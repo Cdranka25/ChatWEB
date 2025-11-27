@@ -509,19 +509,6 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
         )
       }
 
-      {/* minimal styles (coloque no seu CSS principal se preferir) */}
-      <style jsx>{`
-        .fade-in { animation: chatFade 220ms ease; }
-        @keyframes chatFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .message-menu .menu-item { padding: 8px 12px; cursor: pointer; }
-        .message-menu .menu-item:hover { background: #f6f6f6; }
-        .msg { padding: 10px 14px; border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
-        .me { background: linear-gradient(180deg,#dcf8c6,#cfeec0); align-self:flex-end; }
-        .other { background: #fff; border: 1px solid rgba(0,0,0,0.06); align-self:flex-start; }
-        .msg-me { margin-left: 40px; }
-        .msg-other { margin-right: 40px; }
-        .emoji-picker-react { z-index: 300 !important; }
-      `}</style>
     </>
   );
 }

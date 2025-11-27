@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from "react";
-import "../css/App.css";
+
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth } from "./Firebase/FirebaseConfig.js";
+
 import Login from "../jsx/Auth/Login.jsx";
 import Register from "../jsx/Auth/Register.jsx";
+
 import Contacts from "../jsx/Chat/Contacts/Contacts.jsx";
 import PrivateChat from "../jsx/Chat/Private/PrivateChat";
 import GroupChat from "../jsx/Chat/Group/GroupChat";
 import CreateGroup from "../jsx/Chat/Group/CreateGroup";
+
 import Profile from "../jsx/Profile/Profile.jsx";
-import { auth } from "./Firebase/FirebaseConfig.js";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+
+import "../css/Style.css";
+import "../css/Sidebar.css";
+import "../css/Chat.css";
 
 function App() {
     const [user, setUser] = useState(null);

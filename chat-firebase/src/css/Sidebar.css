@@ -1,0 +1,137 @@
+.sidebar {
+    width: 35%;
+    background: #ffffff;
+    border-right: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+}
+
+.logout-btn:hover {
+    background: #023b34;
+}
+
+.section-title {
+    margin: 10px 0 4px 12px;
+    font-size: 14px;
+    color: #444;
+    font-weight: bold;
+}
+
+.contact-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+    display: flex;
+    gap: 12px;
+}
+
+.contactName {
+    font-weight: 600;
+}
+
+.contactContent {
+    font-size: 12px;
+    color: #666;
+}
+
+.contact-item:hover {
+    background: #f5f5f5;
+}
+
+
+.create-group-btn {
+    margin: 15px;
+    padding: 10px;
+    background: #128C7E;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.create-group-btn:hover {
+    background: #0f776b;
+}
+
+.recent-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+
+
+
+/* ============================================================
+   MENU FLUTUANTE (3 PONTOS)
+   ============================================================ */
+
+.menuContainerContacts {
+    position: relative;
+    display: inline-block;
+}
+
+
+.options-container {
+    position: relative;
+}
+
+.menu-button {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.menu-button:hover {
+    opacity: 0.8;
+}
+
+.menu-dropdown {
+    position: absolute;
+    top: 28px;
+    right: 0;
+    width: 160px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 999;
+    overflow: hidden;
+    animation: fadeIn 0.15s ease-out;
+}
+
+.menu-item {
+    padding: 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    color: #333;
+}
+
+.menu-item:hover {
+    background: #f5f5f5;
+}
+
+.menu-item.logout {
+    color: #b00020;
+    font-weight: bold;
+}
+
+.menu-item:last-child {
+    border-bottom: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

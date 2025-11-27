@@ -1,5 +1,6 @@
 import React from "react";
 import { linkifyAndEmojify, formatTime, getMessageUrl } from "../../../js/Chat/PrivateChat.helpers";
+import Avatar from "../../Profile/Avatar.jsx";
 
 export function MessageMenu({
   msg,
@@ -71,17 +72,11 @@ export function MessageBubble({
       }}
     >
       {!isMe && (
-        <img
-          src={sender?.avatarUrl}
-          alt=""
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            marginRight: 8
-          }}
-        />
+        <div style={{ marginRight: 8 }}>
+          <Avatar user={sender} size={36} />
+        </div>
       )}
+
 
       <div className={`msg ${isMe ? "me" : "other"}`} style={{ maxWidth: 480, position: "relative" }}>
         {/* Menu (somente minhas mensagens) */}

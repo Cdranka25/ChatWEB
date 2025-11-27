@@ -1,0 +1,696 @@
+/* ============================================================
+   GLOBAL / RESET
+   ============================================================ */
+body {
+  margin: 0;
+  padding: 0;
+  background: #e5ddd5;
+  font-family:
+    "Segoe UI Emoji",
+    "Apple Color Emoji",
+    "Noto Color Emoji",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+}
+
+/* Font global */
+* {
+  font-family:
+    "Segoe UI Emoji",
+    "Apple Color Emoji",
+    "Noto Color Emoji",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+}
+
+
+/* ============================================================
+   LAYOUT PRINCIPAL
+   ============================================================ */
+.whatsapp-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+}
+
+.sidebar-header,
+.chat-header {
+  height: 60px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  background: #075E54;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  justify-content: space-between;
+}
+
+
+
+
+/* Avatares */
+.sidebar .contact-item img,
+.avatar-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+
+/* ============================================================
+   ÁREA DE CHAT (COLUNA DIREITA)
+   ============================================================ */
+.chat-area {
+  width: 65%;
+  background: #efeae2;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-box {
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+
+/* ============================================================
+   MENSAGENS (BOLHAS)
+   ============================================================ */
+.msg {
+  padding: 10px 14px;
+  margin: 4px 0;
+  max-width: 100%;
+  border-radius: 18px;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  line-height: 1.25;
+  word-wrap: break-word;
+}
+
+/* Mensagens enviadas */
+.me {
+  background: linear-gradient(180deg, #dcf8c6 0%, #cfeec0 100%);
+  align-self: flex-end;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* Mensagens recebidas */
+.other {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  align-self: flex-start;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.msg-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+.hora {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Divisor de datas */
+.date-divider {
+  text-align: center;
+  margin: 12px 0;
+  font-size: 12px;
+  color: #666;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+
+
+/* ============================================================
+   MÍDIAS
+   ============================================================ */
+.msg-media img,
+.msg-media video {
+  max-width: 300px;
+  max-height: 300px;
+  display: block;
+}
+
+.msg-media audio {
+  width: 100%;
+}
+
+.media {
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 8px;
+}
+
+.chat-input img,
+.chat-input video {
+  border-radius: 8px;
+}
+
+
+/* ============================================================
+   INPUT DE MENSAAGEM
+   ============================================================ */
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background: #f0f0f0;
+  border-top: 1px solid #ddd;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+}
+
+.chat-input button {
+  padding: 10px 18px;
+  border: none;
+  background: #075E54;
+  color: white;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.chat-input label input[type="file"] {
+  display: none;
+}
+
+.chat-input label {
+  cursor: pointer;
+}
+
+
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 520px;
+  background: #fff;
+  padding: 18px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================================
+   Animação
+   ============================================================ */
+.fade-in {
+  animation: chatFade 220ms ease;
+}
+
+@keyframes chatFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 800px) {
+  .sidebar {
+    width: 100%;
+    height: 40vh;
+    overflow-y: auto;
+  }
+
+  .chat-area {
+    width: 100%;
+    height: 60vh;
+  }
+
+  .whatsapp-container {
+    flex-direction: column;
+  }
+
+  .chat-input {
+    padding: 8px;
+  }
+}
+
+/* ============================================================
+   EMOJI PICKER — FIX OFICIAL
+   ============================================================ */
+
+/* mantém estilos do componente intactos */
+.emoji-picker-react {
+  z-index: 9999 !important;
+  font-family:
+    "Segoe UI Emoji",
+    "Apple Color Emoji",
+    "Noto Color Emoji",
+    sans-serif !important;
+}
+
+/* NÃO redefinir tudo dentro — apenas ajustar */
+.emoji-picker-react * {
+  font-family:
+    "Segoe UI Emoji",
+    "Apple Color Emoji",
+    "Noto Color Emoji",
+    sans-serif !important;
+}
+
+/* usa aparência padrão dos botões */
+.emoji-picker-react .emoji-button {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* texto das categorias */
+.emoji-picker-react .emoji-group-title {
+  color: #444 !important;
+  font-weight: bold !important;
+}
+
+/* input de busca */
+.emoji-picker-react .search input {
+  padding-left: 36px !important;
+  background: #fff !important;
+  border-radius: 20px !important;
+}
+
+/* botões das categorias — restaurar icons */
+.emoji-picker-react .emoji-categories button {
+  all: unset;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.emoji-picker-react .emoji-categories button img,
+.emoji-picker-react .emoji-categories button svg {
+  width: 22px !important;
+  height: 22px !important;
+  display: block !important;
+}
+
+/* categoria ativa */
+.emoji-picker-react .emoji-categories .active {
+  opacity: 1 !important;
+}
+
+/* tamanho dos emojis do Twemoji */
+.twemoji {
+  width: 1.1em !important;
+  height: 1.1em !important;
+  vertical-align: -0.1em !important;
+  margin: 0 2px !important;
+}
+
+[contenteditable] img.twemoji {
+  margin: 0 2px !important;
+}
+
+/* ===== Twemoji sizing & spacing - normalize across picker, input and messages ===== */
+
+.twemoji {
+  width: 1.25em !important;
+  height: 1.25em !important;
+  vertical-align: -0.10em !important;
+  display: inline-block !important;
+  object-fit: contain !important;
+  margin: 0 6px !important;
+  /* espaçamento entre emojis nas mensagens */
+}
+
+/* contentEditable (input) - garante que a imagem não fique enorme */
+[contenteditable] img.twemoji,
+.message input img.twemoji,
+.message [contenteditable] img.twemoji {
+  width: 1.25em !important;
+  height: 1.25em !important;
+  margin: 0 6px !important;
+}
+
+/* mensagens */
+.msg img.twemoji,
+.msg .twemoji {
+  width: 1.25em !important;
+  height: 1.25em !important;
+  margin: 0 6px !important;
+}
+
+/* picker: deixa os emojis ligeiramente maiores no grid (opcional — fica mais parecido com o picker original) */
+.emoji-picker-react img.twemoji,
+.emoji-picker-react .emoji {
+  width: 1.35em !important;
+  height: 1.35em !important;
+  margin: 0 6px !important;
+}
+
+/* se houver <svg> em vez de <img>, mantenha uma regra de fallback */
+.emoji-picker-react svg,
+.emoji-picker-react svg.twemoji {
+  width: 1.35em !important;
+  height: 1.35em !important;
+}
+
+/* garante que o contentEditable mantenha line-height esperada quando houver imagens */
+[contenteditable] {
+  line-height: 1.4;
+}
+
+/* margem extra caso queira emojis ainda mais espaçados nas mensagens */
+.msg .twemoji {
+  margin-right: 8px !important;
+  margin-left: 4px !important;
+}
+
+/* twemoji dentro de mensagens */
+.msg .twemoji {
+  width: 1.2em !important;
+  height: 1.2em !important;
+  vertical-align: -0.1em !important;
+  margin: 0 3px !important;
+  /* espaço entre emojis nas mensagens */
+  object-fit: contain !important;
+}
+
+/* twemoji dentro do input contentEditable */
+[contenteditable] img.twemoji {
+  width: 1.2em !important;
+  height: 1.2em !important;
+  vertical-align: -0.12em !important;
+  margin: 0 3px !important;
+  /* espaço entre emojis no input */
+  object-fit: contain !important;
+}
+
+/* se o seu input estiver em .message-menu-container (ou similar) */
+.message-menu-container [contenteditable] img.twemoji {
+  width: 1.2em !important;
+  height: 1.2em !important;
+  margin: 0 3px !important;
+}
+
+/* botões simples usados no modal */
+.btn {
+  padding: 8px 12px;
+  background: #075E54;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* modal backdrop e content já existem no seu projeto (você tem .modal-backdrop/.modal-content).
+   Caso precise, garanta: */
+.modal-backdrop {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+:root {
+  --bg: #e5ddd5;
+  --primary: #075E54;
+  --accent: #128C7E;
+  --chat-other: #ffffff;
+  --chat-me-grad-start: #dcf8c6;
+  --chat-me-grad-end: #cfeec0;
+  --global-font-size: 15px;
+}
+
+/* Ajustes globais */
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  font-family:
+    "Segoe UI Emoji",
+    "Apple Color Emoji",
+    "Noto Color Emoji",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+  font-size: var(--global-font-size);
+}
+
+/* Botões de menu */
+.menu-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.menu-button:hover {
+  opacity: 0.9;
+}
+
+/* Settings floating button (usado dentro do componente de settings) */
+.settings-floating {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  z-index: 999;
+}
+
+.settings-floating .settings-floating-menu {
+  right: 0;
+  left: auto;
+}
+
+/* Settings root */
+.settings-root {
+  padding: 12px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-body {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.settings-sidebar {
+  width: 160px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-item {
+  text-align: left;
+  padding: 10px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.settings-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.settings-item.active {
+  background: var(--primary);
+  color: white;
+}
+
+.settings-panel {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+/* small helpers */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+/* theme swatches */
+.theme-swatch {
+  width: 86px;
+  padding: 8px;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.theme-swatch.selected {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+/* reutilizar botões */
+.btn {
+  padding: 8px 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  opacity: 0.95;
+}
+
+/* Responsividade */
+@media (max-width: 800px) {
+  .settings-body {
+    flex-direction: column;
+  }
+
+  .settings-sidebar {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow: auto;
+  }
+
+  .settings-panel {
+    width: 100%;
+  }
+}
+
+
+/* ============================
+   CONFIGURAÇÕES (SIDEBAR)
+   ============================ */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.settings-header {
+  background: #075E54;
+  color: white;
+  padding: 16px;
+  font-size: 17px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.settings-title {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.settings-list {
+  padding: 10px 0;
+}
+
+.settings-item {
+  padding: 16px 18px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+}
+
+.settings-item:hover {
+  background: #f5f5f5;
+}
+
+.settings-item.danger {
+  color: #b00020;
+  font-weight: bold;
+}
+

@@ -169,17 +169,10 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                 <span>Olá, {currentUser.displayName || currentUser.email}</span>
 
                 {/* MENU */}
-                <div ref={menuRef} style={{ position: "relative" }}>
+                <div className="menuContainerContacts" ref={menuRef} >
                     <button
                         className="menu-button"
-                        onClick={() => setShowMenu(m => !m)}
-                        style={{
-                            background: "transparent",
-                            border: "none",
-                            color: "white",
-                            fontSize: 24,
-                            cursor: "pointer"
-                        }}>
+                        onClick={() => setShowMenu(m => !m)}>
                         ⋮
                     </button>
 
@@ -241,9 +234,9 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                 <>
                     <h3 className="section-title">Conversas Recentes</h3>
 
-                    <div className="recent-list" style={{ overflowY: "auto", flex: 1 }}>
+                    <div className="recent-list">
                         {recentChats.length === 0 && (
-                            <p style={{ fontSize: 13, paddingLeft: 12, color: "#777" }}>
+                            <p>
                                 Nenhuma conversa recente.
                             </p>
                         )}
@@ -258,13 +251,10 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                                             setChatGroup(chat);
                                             setChatUser(null);
                                             setScreen("group");
-                                        }}
-                                        style={{ display: "flex", alignItems: "center", gap: 12 }}
-                                    >
+                                        }}>
                                         <Avatar user={null} label={chat.name} size={44} />
                                         <div>
-                                            <div style={{ fontWeight: 600 }}>{chat.name}</div>
-                                            <div style={{ fontSize: 12, color: "#666" }}>
+                                            <div >
                                                 {chat.lastMessage || "Novo grupo"}
                                             </div>
                                         </div>
@@ -285,14 +275,14 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                                         setChatGroup(null);
                                         setScreen("private");
                                     }}
-                                    style={{ display: "flex", alignItems: "center", gap: 12 }}
+                                    
                                 >
                                     <Avatar user={otherUser} size={44} />
                                     <div>
-                                        <div style={{ fontWeight: 600 }}>
+                                        <div className="contactName">
                                             {otherUser.nome || otherUser.email}
                                         </div>
-                                        <div style={{ fontSize: 12, color: "#666" }}>
+                                        <div className="contactContent">
                                             {chat.lastMessage || "Conversa vazia"}
                                         </div>
                                     </div>
@@ -319,7 +309,6 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                                 <div
                                     key={c.id}
                                     className="contact-item"
-                                    style={{ display: "flex", alignItems: "center", gap: 12 }}
                                     onClick={() => {
                                         setChatUser(c);
                                         setShowAddModal(false);
@@ -335,31 +324,22 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                         <hr />
 
                         <input
+                            className="sidebarSearchContacts"
                             placeholder="Buscar por nome, email ou ID"
                             value={searchAdd}
                             onChange={e => setSearchAdd(e.target.value)}
-                            style={{ width: "100%", padding: 10, marginBottom: 12 }}
                         />
 
                         {searchResults.map(u => (
                             <div
                                 key={u.id}
                                 className="contact-item"
-                                style={{ display: "flex", alignItems: "center", gap: 12 }}
                                 onClick={() => addContactAndCreateRoom(u)}
                             >
                                 <Avatar user={u} size={44} />
                                 <div>{u.nome || u.email}</div>
                             </div>
                         ))}
-
-                        <button
-                            className="logout-btn"
-                            style={{ marginTop: 20 }}
-                            onClick={() => setShowAddModal(false)}
-                        >
-                            Fechar
-                        </button>
 
                     </div>
                 </div>
