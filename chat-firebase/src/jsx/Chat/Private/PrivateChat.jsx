@@ -20,9 +20,11 @@ import useSearchUsers from "../../../js/Search/UseSearchUsers.js";
 import { uploadFileForMessage, extractFileFromPaste, permissiveFileTypeCheck } from "../../../js/Chat/PrivateChat.media.js";
 import { makeRoomId, formatTime, getMessageUrl, linkifyText } from "../../../js/Chat/PrivateChat.helpers.js";
 import { MessageBubble } from "./PrivateChat.MessageComponents.jsx";
-import Picker from "emoji-picker-react";
 import { db } from "../../../js/Firebase/FirebaseConfig.js";
+
+import MessageInput from "../Message/MessageInput.jsx";
 import EmojiInput from "../Emoji/EmojiInput.jsx";
+
 import ProfileView from "../../Profile/ProfileView.jsx";
 import GifSearchModal from "../Gif/GifSearchModal.jsx"
 
@@ -43,7 +45,6 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
   const [editingMessage, setEditingMessage] = useState(null);
   const [editText, setEditText] = useState("");
 
-  const [showEmoji, setShowEmoji] = useState(false);
   const [showGifSearch, setShowGifSearch] = useState(false);
 
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -51,8 +52,6 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
 
   const listRef = useRef(null);
   const inputWrapperRef = useRef(null);
-  const emojiButtonRef = useRef(null);
-  const pickerRef = useRef(null);
 
 
 
@@ -301,70 +300,28 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
 
   const findUserById = (id) => allUsers?.find(u => u.id === id) || { nome: "", email: "", avatarUrl: "" };
 
-  // ---------- EMOJI PICKER open/close (posicionado next to button) ----------
-  useEffect(() => {
-    function onDocClick(e) {
-      if (emojiButtonRef.current && emojiButtonRef.current.contains(e.target)) return;
-      if (pickerRef.current && pickerRef.current.contains(e.target)) return;
-      // fora do picker -> fechar
-      setShowEmoji(false);
-    }
+  // ---------- EMOJI PICKER ----------
+  const messageInputRef = useRef(null);
 
-
-    if (showEmoji) document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [showEmoji]);
-
-
-  const handleEmojiClick = (emojiData) => {
-    const emoji =
-      emojiData?.emoji ||
-      emojiData?.native ||
-      (emojiData?.unified
-        ? emojiData.unified
-          .split("-")
-          .map(u => String.fromCodePoint(parseInt(u, 16)))
-          .join("")
-        : "");
-
-    if (!emoji) return;
-
-    // atualiza estado React (controlado)
+  const onEmojiReceived = (emoji) => {
     if (editingMessage) {
-      setEditText(prev => {
-        const nv = (prev || "") + emoji;
-        return nv;
-      });
+      setEditText(prev => (prev || "") + emoji);
     } else {
-      setText(prev => {
-        const nv = (prev || "") + emoji;
-        return nv;
-      });
+      setText(prev => (prev || "") + emoji);
     }
 
-    const div = inputWrapperRef.current?.querySelector("[contenteditable]");
-    if (div) {
-      const newText = (editingMessage ? (editText || "") : (text || "")) + emoji;
-      div.textContent = newText;
-      div.focus();
-      const evt = new Event("input", { bubbles: true });
-      div.dispatchEvent(evt);
+    // insere visualmente no campo
+    if (messageInputRef.current) {
+      messageInputRef.current.insertAtCursor(emoji);
+      messageInputRef.current.focus();
     }
   };
 
-  // ---------- GIF SEND ----------
-  useEffect(() => {
-    const div = inputWrapperRef.current?.querySelector("[contenteditable]");
-    if (!div) return;
+  const handleEnter = () => {
+    if (editingMessage) saveEdit();
+    else send();
+  };
 
-    function onEnter() {
-      if (editingMessage) saveEdit();
-      else send();
-    }
-
-    div.addEventListener("emoji-input-enter", onEnter);
-    return () => div.removeEventListener("emoji-input-enter", onEnter);
-  }, [editingMessage, text, editText]);
 
   // --- RENDERIZA PERFIL DO OUTRO USUÁRIO AO CLICAR ---
   if (showProfile) {
@@ -417,8 +374,6 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
                 onDeleteForMe={deleteForMe}
                 onDeleteForAll={deleteForAll}
               />
-              {/* ticks area (for my messages) */}
-              <div style={{ marginLeft: isMe ? 8 : 0 }}>{isMe && renderStatus(m)}</div>
             </div>
           );
         })}
@@ -426,56 +381,30 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
 
       {/* input area */}
       <div className="chat-input" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {/* preview */}
+
         {previewUrl && (
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {file && file.type.startsWith("image/") && <img src={previewUrl} alt="prev" style={{ width: 160, height: 120, objectFit: "cover", borderRadius: 8 }} />}
+            {file && file.type.startsWith("image/") && (
+              <img src={previewUrl} alt="prev" style={{ width: 160, height: 120, objectFit: "cover", borderRadius: 8 }} />
+            )}
             {file && file.type.startsWith("video/") && <video src={previewUrl} style={{ width: 180 }} controls />}
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <div style={{ fontSize: 13, fontWeight: 700 }}>{file?.name}</div>
-              <button onClick={() => { if (previewUrl) URL.revokeObjectURL(previewUrl); setPreviewUrl(""); setFile(null); }}>Remover</button>
+              <button onClick={() => { URL.revokeObjectURL(previewUrl); setPreviewUrl(""); setFile(null); }}>Remover</button>
             </div>
           </div>
         )}
 
         <div ref={inputWrapperRef} style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
-          {/* emoji wrapper */}
-          <div style={{ position: "relative" }}>
-            <button
-              ref={emojiButtonRef}
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowEmoji(v => !v);
-              }}
-              style={{ padding: 8, borderRadius: 8 }}
-            >
-              😊
-            </button>
 
-            {showEmoji && (
-              <div
-                ref={pickerRef}
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  position: "absolute",
-                  bottom: 56,
-                  left: 0,
-                  zIndex: 220,
-                  boxShadow: "0 6px 18px rgba(0,0,0,0.15)"
-                }}
-              >
-                <Picker onEmojiClick={handleEmojiClick} />
-              </div>
-            )}
-          </div>
+          <EmojiInput onEmoji={onEmojiReceived} />
 
-          <EmojiInput
+          <MessageInput
+            ref={messageInputRef}
             value={editingMessage ? editText : text}
+            onChange={(val) => editingMessage ? setEditText(val) : setText(val)}
+            onEnter={handleEnter}
             placeholder={editingMessage ? "Editando..." : "Mensagem..."}
-            onChange={(val) => {
-              if (editingMessage) setEditText(val);
-              else setText(val);
-            }}
           />
 
           <label style={{ cursor: "pointer" }}>
@@ -483,32 +412,35 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
             <input type="file" style={{ display: "none" }} accept="image/*,video/*,audio/*,*/*" onChange={onSelectFile} />
           </label>
 
-          <button onClick={() => setShowGifSearch(true)} style={{ padding: 8, borderRadius: 8 }}>GIF</button>
-
+          <button onClick={() => setShowGifSearch(true)} style={{ padding: 8, borderRadius: 8 }}>
+            GIF
+          </button>
 
           {editingMessage ? (
             <>
               <button onClick={cancelEdit}>Cancelar</button>
-              <button onClick={saveEdit} style={{ background: "#075E54", color: "#fff", borderRadius: 8 }}>Salvar</button>
+              <button onClick={saveEdit} style={{ background: "#075E54", color: "#fff", borderRadius: 8 }}>
+                Salvar
+              </button>
             </>
           ) : (
-            <button onClick={send} disabled={uploading} style={{ background: "#075E54", color: "#fff", borderRadius: 20, padding: "8px 12px" }}>
+            <button
+              onClick={send}
+              disabled={uploading}
+              style={{ background: "#075E54", color: "#fff", borderRadius: 20, padding: "8px 12px" }}
+            >
               {uploading ? "Enviando..." : "Enviar"}
             </button>
           )}
         </div>
       </div>
 
-      {/* GIF modal */}
-      {
-        showGifSearch && (
-          <GifSearchModal
-            onClose={() => setShowGifSearch(false)}
-            onPickGif={(url) => sendGif(url)}
-          />
-        )
-      }
-
+      {showGifSearch && (
+        <GifSearchModal
+          onClose={() => setShowGifSearch(false)}
+          onPickGif={(url) => sendGif(url)}
+        />
+      )}
     </>
   );
 }

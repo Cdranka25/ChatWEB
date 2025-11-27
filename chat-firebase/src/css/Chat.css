@@ -1,0 +1,5 @@
+.message-input:empty:before {
+  content: attr(data-placeholder);
+  color: #999;
+  pointer-events: none;
+}

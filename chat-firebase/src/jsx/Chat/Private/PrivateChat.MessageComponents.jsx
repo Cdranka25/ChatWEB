@@ -1,6 +1,9 @@
-import React from "react";
+// src/jsx/Chat/Private/PrivateChat.MessageComponents.jsx
+
+import React, { useEffect, useRef } from "react";
 import { linkifyAndEmojify, formatTime, getMessageUrl } from "../../../js/Chat/PrivateChat.helpers";
 import Avatar from "../../Profile/Avatar.jsx";
+
 
 export function MessageMenu({
   msg,
@@ -10,8 +13,25 @@ export function MessageMenu({
   openMenuId,
   setOpenMenuId
 }) {
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        openMenuId === msg.id &&
+        menuRef.current &&
+        !menuRef.current.contains(e.target)
+      ) {
+        setOpenMenuId(null);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [openMenuId, msg.id]);
+
   return (
-    <div style={{ position: "absolute", top: -6, right: -6 }}>
+    <div style={{ position: "absolute", top: -6, right: -6, zIndex: 1000 }}>
       <button
         onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)}
         style={{ background: "transparent", border: "none", cursor: "pointer" }}
@@ -21,6 +41,7 @@ export function MessageMenu({
 
       {openMenuId === msg.id && (
         <div
+          ref={menuRef}
           style={{
             background: "#fff",
             border: "1px solid #ddd",
@@ -28,7 +49,10 @@ export function MessageMenu({
             position: "absolute",
             right: 0,
             top: 26,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+            boxShadow: "0 4px 12px rgba(0,0,0,0.20)",
+            zIndex: 9999,
+            minWidth: 160,
+            overflow: "hidden"
           }}
         >
           <div className="menu-item" onClick={() => onEdit(msg)}>Editar</div>
@@ -78,8 +102,8 @@ export function MessageBubble({
       )}
 
 
-      <div className={`msg ${isMe ? "me" : "other"}`} style={{ maxWidth: 480, position: "relative" }}>
-        {/* Menu (somente minhas mensagens) */}
+      <div className={`msg ${isMe ? "me" : "other"}`} style={{ maxWidth: 480, position: "relative", overflow: "visible" }}>
+        {/* Menu*/}
         {isMe && (
           <MessageMenu
             msg={{ ...m, currentUserId }}
@@ -133,18 +157,40 @@ export function MessageBubble({
           />
         )}
 
-        {/* Hora */}
+        {/* Hora + ticks */}
         <div
-          className="hora"
           style={{
-            fontSize: 11,
-            marginTop: 6,
-            textAlign: "right",
-            opacity: 0.7
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: 4,               
+            marginTop: 4,
+            fontSize: 11,       
+            opacity: 0.75,
+            minHeight: 14,     
           }}
         >
-          {formatTime(m.createdAt)} {m.edited && "(editada)"}
+          <span>{formatTime(m.createdAt)}{m.edited && " (editada)"}</span>
+
+          {/* status */}
+          {m.from === currentUserId && (
+            <span
+              style={{
+                fontSize: 11,
+                opacity: m.status === "seen" ? 1 : 0.6,
+                color: m.status === "seen" ? "#19a1ff" : "inherit",
+                width: 18,   
+                display: "inline-block",
+                textAlign: "left",
+              }}
+            >
+              {m.status === "sent" && "✓"}
+              {m.status === "received" && "✓✓"}
+              {m.status === "seen" && "✓✓"}
+            </span>
+          )}
         </div>
+
       </div>
     </div>
   );

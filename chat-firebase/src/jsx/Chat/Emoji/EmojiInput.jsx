@@ -1,53 +1,63 @@
 // src/jsx/Emoji/EmojiInput.jsx
 import React, { useRef, useEffect } from "react";
-import { emojify } from "../../../js/Chat/Emoji/EmojiParser";
+import Picker from "emoji-picker-react";
 
-export default function EmojiInput({ value, onChange, placeholder }) {
-  const divRef = useRef(null);
+export default function EmojiInput({ onEmoji }) {
+  const btnRef = useRef(null);
+  const pickerRef = useRef(null);
+  const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
-    if (!divRef.current) return;
-
-    const html = emojify(value);
-
-    if (divRef.current.innerText !== value) {
-      divRef.current.textContent = value;
+    function handleDocClick(e) {
+      if (btnRef.current && btnRef.current.contains(e.target)) return;
+      if (pickerRef.current && pickerRef.current.contains(e.target)) return;
+      setOpen(false);
     }
-  }, [value]);
+    if (open) document.addEventListener("mousedown", handleDocClick);
+    return () => document.removeEventListener("mousedown", handleDocClick);
+  }, [open]);
 
-  const handleInput = () => {
-    const text = divRef.current.innerText;
-    onChange(text);
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      divRef.current.dispatchEvent(new CustomEvent("emoji-input-enter"));
-    }
+  const handleEmojiClick = (emojiData) => {
+    const emoji =
+      emojiData?.emoji ||
+      emojiData?.native ||
+      (emojiData?.unified
+        ? emojiData.unified
+          .split("-")
+          .map(u => String.fromCodePoint(parseInt(u, 16)))
+          .join("")
+        : "");
+    onEmoji && onEmoji(emoji);
+    // keep picker open or close as you prefer:
+    // setOpen(false);
   };
 
   return (
-    <div
-      ref={divRef}
-      contentEditable
-      onInput={handleInput}
-      onKeyDown={handleKeyDown}
-      data-placeholder={placeholder}
-      style={{
-        flex: 1,
-        padding: "12px 14px",
-        border: "1px solid #ccc",
-        borderRadius: "20px",
-        minHeight: "24px",
-        maxHeight: "200px",
-        overflowY: "auto",
-        outline: "none",
-        whiteSpace: "pre-wrap",
-        fontSize: "15px",
-        lineHeight: "1.45",
-        fontFamily: `"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`,
-      }}
-    />
+    <div style={{ position: "relative", display: "inline-block" }}>
+      <button
+        ref={btnRef}
+        onClick={(e) => { e.stopPropagation(); setOpen(v => !v); }}
+        style={{ padding: 8, borderRadius: 8, background: "transparent", border: "none", cursor: "pointer" }}
+      >
+        😊
+      </button>
+
+      {open && (
+        <div
+          ref={pickerRef}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: "absolute",
+            bottom: "calc(100% + 8px)",
+            left: 0,
+            zIndex: 9999,
+            boxShadow: "0 6px 18px rgba(0,0,0,0.15)"
+          }}
+        >
+          <Picker onEmojiClick={handleEmojiClick} />
+        </div>
+      )}
+    </div>
   );
 }
+

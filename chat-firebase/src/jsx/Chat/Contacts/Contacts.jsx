@@ -164,74 +164,39 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
     return (
         <div className="sidebar">
 
-            {/* HEADER */}
-            <div className="sidebar-header">
-                <span>Olá, {currentUser.displayName || currentUser.email}</span>
+            {/* SE NÃO estiver nas configurações, mostra o HEADER */}
+            {!showSettings && (
+                <div className="sidebar-header">
+                    <span>Olá, {currentUser.displayName || currentUser.email}</span>
 
-                {/* MENU */}
-                <div className="menuContainerContacts" ref={menuRef} >
-                    <button
-                        className="menu-button"
-                        onClick={() => setShowMenu(m => !m)}>
-                        ⋮
-                    </button>
+                    {/* MENU */}
+                    <div className="menuContainerContacts" ref={menuRef} >
+                        <button
+                            className="menu-button"
+                            onClick={() => setShowMenu(m => !m)}>
+                            ⋮
+                        </button>
 
-                    {showMenu && (
-                        <div className="menu-dropdown">
-                            <div
-                                className="menu-item"
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    setScreen("createGroup");
-                                }}
-                            >Criar Grupo</div>
-
-                            <div
-                                className="menu-item"
-                                onClick={() => {
-                                    setShowAddModal(true);
-                                    setShowMenu(false);
-                                }}
-                            >Adicionar Contato</div>
-
-                            <div
-                                className="menu-item"
-                                onClick={() => {
-                                    setShowSettings(true);
-                                    setShowMenu(false);
-                                }}
-                            >
-                                Configurações
+                        {showMenu && (
+                            <div className="menu-dropdown">
+                                <div className="menu-item" onClick={() => { setShowMenu(false); setScreen("createGroup"); }}>Criar Grupo</div>
+                                <div className="menu-item" onClick={() => { setShowAddModal(true); setShowMenu(false); }}>Adicionar Contato</div>
+                                <div className="menu-item" onClick={() => { setShowSettings(true); setShowMenu(false); }}>Configurações</div>
+                                <div className="menu-item" onClick={() => { setShowMenu(false); setScreen("profile"); }}>Perfil</div>
+                                <div className="menu-item logout" onClick={() => { setShowMenu(false); logout(); }}>Sair</div>
                             </div>
-
-
-                            <div
-                                className="menu-item"
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    setScreen("profile");
-                                }}
-                            >
-                                Perfil
-                            </div>
-
-                            <div
-                                className="menu-item logout"
-                                onClick={() => {
-                                    setShowMenu(false);
-                                    logout();
-                                }}
-                            >Sair</div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            {/* LISTA DE CONVERSAS RECENTES */}
+            {/* CONTEÚDO */}
             {showSettings ? (
                 <SettingsScreen onBack={() => setShowSettings(false)} />
             ) : (
                 <>
+
+                    {/* LISTA DE CONVERSAS RECENTES */}
                     <h3 className="section-title">Conversas Recentes</h3>
 
                     <div className="recent-list">
@@ -275,7 +240,7 @@ export default function Contacts({ currentUser, setChatUser, setChatGroup, setSc
                                         setChatGroup(null);
                                         setScreen("private");
                                     }}
-                                    
+
                                 >
                                     <Avatar user={otherUser} size={44} />
                                     <div>
