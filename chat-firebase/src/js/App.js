@@ -1,3 +1,4 @@
+// chat-firebase/src/js/App.js
 import React, { useState, useEffect } from "react";
 
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -6,10 +7,11 @@ import { auth } from "./Firebase/FirebaseConfig.js";
 import Login from "../jsx/Auth/Login.jsx";
 import Register from "../jsx/Auth/Register.jsx";
 
+import Sidebar from "../jsx/Sidebar/Sidebar.jsx";
 import Contacts from "../jsx/Chat/Contacts/Contacts.jsx";
-import PrivateChat from "../jsx/Chat/Private/PrivateChat";
-import GroupChat from "../jsx/Chat/Group/GroupChat";
-import CreateGroup from "../jsx/Chat/Group/CreateGroup";
+import PrivateChat from "../jsx/Chat/Private/PrivateChat.jsx";
+import GroupChat from "../jsx/Chat/Group/GroupChat.jsx";
+import CreateGroup from "../jsx/Chat/Group/CreateGroup.jsx";
 
 import Profile from "../jsx/Profile/Profile.jsx";
 
@@ -67,7 +69,7 @@ function App() {
     return (
         <div className="whatsapp-container">
 
-            <Contacts
+            <Sidebar
                 currentUser={user}
                 setChatUser={setChatUser}
                 setChatGroup={setChatGroup}
@@ -105,7 +107,7 @@ function App() {
                         setScreen={setScreen}
                     />
                 )}
-                
+
                 {screen === "profile" && (
                     <Profile
                         currentUser={user}
@@ -119,6 +121,7 @@ function App() {
             </div>
         </div>
     );
+
 }
 
 export default App;

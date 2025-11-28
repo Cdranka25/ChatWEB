@@ -1,4 +1,4 @@
-// src/js/Chat/Emoji/EmojiFallback.js
+// src/js/Chat_js/Emoji/EmojiFallback.js
 import twemoji from "twemoji";
 
 export function emojiNeedsFallback(emoji) {

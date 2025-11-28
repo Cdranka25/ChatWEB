@@ -10,7 +10,7 @@ if (!TENOR_KEY) {
 }
 
 
-export async function searchGifs(query, { limit = 24, pos = null } = {}) {
+export async function searchGifs(query, { limit = 6, pos = null } = {}) {
   if (!TENOR_KEY) throw new Error("Tenor API key missing");
 
   const params = {
@@ -30,7 +30,7 @@ export async function searchGifs(query, { limit = 24, pos = null } = {}) {
   };
 }
 
-export async function trendingGifs({ limit = 24, pos = null } = {}) {
+export async function trendingGifs({ limit = 6, pos = null } = {}) {
   if (!TENOR_KEY) throw new Error("Tenor API key missing");
 
   const params = {

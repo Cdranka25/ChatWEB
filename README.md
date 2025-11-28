@@ -52,7 +52,7 @@ Projeto ChatWEB
             Plataforma de busca por GIFs e banco de dados de GIFs animados, de propriedade do Google. 
             Utilizado integrado ao teclado no Android e IOS e utilizado no Whatsapp, Messenger, Discord, etc.
             Como o firebase e o tenor são desenvolvidos pela Google e são integrados ao Google Cloud, a mesma API Key pode ser utilizado para os dois.
-        
+
         > Biblioteca axios 
             Biblioteca que permite e auxilia na integração de projetos REACT com qualquer serviço de API disponível.
     
@@ -75,7 +75,7 @@ Projeto ChatWEB
         > Instalar API de Gifs - Tenor API e biblioteca Axios
             # biblioteca HTTP (pode usar fetch, mas axios facilita)
             npm install axios
-    
+
         > Criar arquivo .env 
             Criar arquivo.env e manter na pasta do projeto, ele conterá as API Keys. Exemplo:
                 REACT_APP_SUPABASE_URL=<sua_url>

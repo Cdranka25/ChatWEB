@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import useSearchUsers from "../../../js/Search/UseSearchUsers.js";
 
 export default function CreateGroup({ currentUser, setScreen }) {
-    const { allUsers, filtered, search, searchUsers } = useSearchUsers(); 
+    const { allUsers, filtered, search, searchUsers } = useSearchUsers();
     const [name, setName] = useState("");
     const [selected, setSelected] = useState([]);
 
@@ -21,21 +21,31 @@ export default function CreateGroup({ currentUser, setScreen }) {
         if (!name) return alert("Nome do grupo obrigatório");
         if (selected.length === 0) return alert("Selecione pelo menos 1 membro");
 
-        const membersData = [currentUser.uid, ...selected].map(id => {
-            const user = allUsers?.find(u => u.id === id) || filtered?.find(u => u.id === id);
+        // 🔥 membros como STRINGS
+        const members = [currentUser.uid, ...selected];
+
+        // 🔥 metadata dos membros separada (opcional, igual WhatsApp Business API)
+        const memberData = members.map(id => {
+            const u =
+                allUsers?.find(x => x.id === id) ||
+                filtered?.find(x => x.id === id);
+
             return {
                 id,
-                nome: user?.nome || user?.email || "Usuário",
-                email: user?.email || "",
-                avatarUrl: user?.avatarUrl || ""
+                nome: u?.nome || u?.email || "Usuário",
+                email: u?.email || "",
+                avatarUrl: u?.avatarUrl || ""
             };
         });
 
         await addDoc(collection(db, "groups"), {
             name,
-            members: membersData,
+            members,          // ← agora correto
+            memberData,       // ← opcional e compatível com GroupChat
             createdBy: currentUser.uid,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            lastMessage: "",
+            lastUpdated: serverTimestamp()
         });
 
         setScreen("private");
@@ -67,7 +77,7 @@ export default function CreateGroup({ currentUser, setScreen }) {
                         checked={selected.includes(u.id)}
                         onChange={() => toggle(u.id)}
                     />
-                    {u.nome || u.email} {/* Mostra nome ou email */}
+                    {u.nome || u.email}
                 </label>
             ))}
 
@@ -76,7 +86,6 @@ export default function CreateGroup({ currentUser, setScreen }) {
                 <button onClick={() => setScreen("private")}>Cancelar</button>
             </div>
 
-            {/* Mostra quantos membros foram selecionados */}
             <div style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
                 {selected.length} membro(s) selecionado(s)
             </div>

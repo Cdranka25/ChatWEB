@@ -1,6 +1,6 @@
 // src/jsx/Gif/GifSearchModal.jsx
 import React, { useEffect, useState, useRef } from "react";
-import { searchGifs, trendingGifs } from "../../../js/Chat/Gif/TenorApi.js";
+import { searchGifs, trendingGifs } from "../../../js/Chat_js/Gif/TenorApi.js";
 
 export default function GifSearchModal({ onClose, onPickGif }) {
   const [query, setQuery] = useState("");
@@ -15,11 +15,26 @@ export default function GifSearchModal({ onClose, onPickGif }) {
     loadTrending();
   }, []);
 
+  const timeoutRef = useRef(null);
+
+  function debouncedSearch(text) {
+    setQuery(text);
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    if (text.trim() === "") {
+      loadTrending();
+      return;
+    
+    }
+    timeoutRef.current = setTimeout(() => {
+      if (text.trim().length > 0) doSearch();
+    }, 350);
+  }
   const loadTrending = async (pos = null) => {
     setLoading(true);
     try {
-      const r = await trendingGifs({ limit: 24, pos });
-      setGifs(pos ? [...gifs, ...r.results] : r.results);
+      const r = await trendingGifs({ limit: 6, pos });
+      setGifs(prev => pos ? [...prev, ...r.results] : r.results);
       setNextPos(r.next);
       setError("");
     } catch (err) {
@@ -30,11 +45,28 @@ export default function GifSearchModal({ onClose, onPickGif }) {
     }
   };
 
+  const gridRef = useRef(null);
+
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+
+    function handleScroll() {
+      if (loading) return;
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 200) {
+        loadMore();
+      }
+    }
+
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [loading, nextPos]);
+
   const doSearch = async (e) => {
     if (e) e.preventDefault();
     setLoading(true);
     try {
-      const r = await searchGifs(query, { limit: 24 });
+      const r = await searchGifs(query, { limit: 6 });
       setGifs(r.results);
       setNextPos(r.next);
       setError("");
@@ -51,8 +83,8 @@ export default function GifSearchModal({ onClose, onPickGif }) {
     setLoading(true);
     try {
       const r = query
-        ? await searchGifs(query, { limit: 24, pos: nextPos })
-        : await trendingGifs({ limit: 24, pos: nextPos });
+        ? await searchGifs(query, { limit: 12, pos: nextPos })
+        : await trendingGifs({ limit: 12, pos: nextPos });
 
       setGifs((prev) => [...prev, ...r.results]);
       setNextPos(r.next);
@@ -68,9 +100,10 @@ export default function GifSearchModal({ onClose, onPickGif }) {
     const fm = gif.media_formats || {};
 
     const gifUrl =
-      fm.mediumgif?.url ||
-      fm.gif?.url ||
+      fm.nanogif?.url ||
       fm.tinygif?.url ||
+      fm.gif?.url ||
+      fm.mediumgif?.url ||
       fm.mp4?.url ||
       null;
 
@@ -95,7 +128,7 @@ export default function GifSearchModal({ onClose, onPickGif }) {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: 12,
+            gap: 6,
             marginBottom: 10,
           }}
         >
@@ -104,7 +137,7 @@ export default function GifSearchModal({ onClose, onPickGif }) {
               ref={inputRef}
               placeholder="Pesquisar GIFs (ex: comemoração, risada)"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => debouncedSearch(e.target.value)}
               style={{
                 width: "100%",
                 padding: "8px 12px",
@@ -133,6 +166,7 @@ export default function GifSearchModal({ onClose, onPickGif }) {
         )}
 
         <div
+          ref={gridRef}
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))",
@@ -145,9 +179,10 @@ export default function GifSearchModal({ onClose, onPickGif }) {
             const fm = g.media_formats || {};
 
             const displayUrl =
-              fm.mediumgif?.url ||
-              fm.gif?.url ||
+              fm.nanogif?.url ||
               fm.tinygif?.url ||
+              fm.gif?.url ||
+              fm.mediumgif?.url ||
               "";
 
             return (
@@ -158,6 +193,7 @@ export default function GifSearchModal({ onClose, onPickGif }) {
               >
                 <img
                   src={displayUrl}
+                  loading="lazy"
                   alt={g.title || "gif"}
                   style={{
                     width: "100%",
@@ -166,6 +202,7 @@ export default function GifSearchModal({ onClose, onPickGif }) {
                     borderRadius: 6,
                   }}
                 />
+
               </div>
             );
           })}
