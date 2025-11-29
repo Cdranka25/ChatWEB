@@ -1,0 +1,41 @@
+.profile-screen {
+  background: #efeae2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  overflow-y: auto;
+}
+
+.profile-card {
+  width: 100%;
+  max-width: 840px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.profile-field input,
+.profile-field textarea,
+.profile-field select {
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+}

@@ -11,8 +11,6 @@ import {
   setDoc,
   getDoc,
   updateDoc,
-  where,
-  getDocs,
   arrayUnion
 } from "firebase/firestore";
 import { db } from "../../../js/Firebase/FirebaseConfig.js";
@@ -33,7 +31,7 @@ import ProfileView from "../../Profile/ProfileView.jsx";
 export default function PrivateChat({ currentUser, otherUser, onClose }) {
   const roomId = makeRoomId(currentUser.uid, otherUser.id);
   const { allUsers } = useSearchUsers();
-  const extractFileFromPaste = () => { };
+  const initialSnapshotProcessed = useRef(false);
 
   const [messages, setMessages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -47,6 +45,15 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
   const messageInputRef = useRef(null); // ref para o MessageInput
 
   // --------------- listeners & inicialização ---------------
+  useEffect(() => {
+    notify?.setChatActive?.(true);  // desliga notificações deste chat
+    return () => notify?.setChatActive?.(false); // liga novamente ao fechar
+  }, []);
+
+  useEffect(() => {
+    initialSnapshotProcessed.current = false;
+  }, [roomId]);
+
   useEffect(() => {
     let unsub;
     const setup = async () => {
@@ -62,31 +69,75 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
         });
       }
 
+      function scrollToBottom() {
+        setTimeout(() => {
+          if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+        }, 40);
+      }
+
       // listener mensagens
       const q = query(collection(db, `rooms/${roomId}/messages`), orderBy("createdAt", "asc"));
       unsub = onSnapshot(q, async s => {
         const arr = s.docs.map(d => ({ id: d.id, ...d.data() }));
         setMessages(arr);
 
-        // atualiza status received (se necessário)
-        const updates = [];
-        for (let d of s.docs) {
-          const data = d.data();
-          if (!data) continue;
-          if (data.from !== currentUser.uid && data.status === "sent") {
-            updates.push(updateDoc(d.ref, { status: "received" }));
+        // === SNAPSHOT INICIAL ===
+        if (!initialSnapshotProcessed.current) {
+          initialSnapshotProcessed.current = true;
+
+          // 1) marcar RECEIVED
+          const toReceiveInitial = s.docs.filter(d =>
+            d.data().from !== currentUser.uid &&
+            d.data().status === "sent"
+          );
+
+          if (toReceiveInitial.length > 0) {
+            await Promise.all(
+              toReceiveInitial.map(d =>
+                updateDoc(d.ref, { status: "received" })
+              )
+            );
           }
-        }
-        if (updates.length) {
-          try { await Promise.all(updates); } catch (e) { /* ignore */ }
+
+          // 2) marcar SEEN
+          await markMessagesAsSeen(arr);
+          scrollToBottom();
+          return;
         }
 
+        // === SNAPSHOTS SUBSEQUENTES (MENSAGENS NOVAS) ===
+
+        // marcar RECEIVED nas mensagens novas
+        const toReceive = s
+          .docChanges()
+          .filter(change => change.type === "added")
+          .map(change => change.doc)
+          .filter(d =>
+            d.data().from !== currentUser.uid &&
+            d.data().status === "sent"
+          );
+
+        if (toReceive.length > 0) {
+          await Promise.all(
+            toReceive.map(d =>
+              updateDoc(d.ref, { status: "received" })
+            )
+          );
+        }
+
+        // marcar SEEN nas mensagens novas
+        await markMessagesAsSeen(arr);       // primeira tentativa
+        scrollToBottom();
+
+        // segunda tentativa obrigatória, pois o snapshot inicial não reflete updates imediatamente
         setTimeout(() => {
-          if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
-        }, 40);
+          markMessagesAsSeen(arr);
+        }, 200);
+
+        return;
       });
 
-      await markMessagesAsSeen();
+
     };
 
     setup();
@@ -94,25 +145,33 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
   }, [roomId, currentUser.uid, otherUser.id]);
 
   // marca como lido / seen
-  async function markMessagesAsSeen() {
+  async function markMessagesAsSeen(messagesArr) {
     try {
-      const messagesRef = collection(db, `rooms/${roomId}/messages`);
-      const q = query(messagesRef, where("from", "!=", currentUser.uid));
-      const snap = await getDocs(q);
       const updates = [];
-      for (let d of snap.docs) {
-        const data = d.data();
-        if (!data) continue;
-        const seenBy = data.seenBy || [];
+
+      for (let msg of messagesArr) {
+        if (msg.from === currentUser.uid) continue;
+
+        const seenBy = msg.seenBy || [];
         if (!seenBy.includes(currentUser.uid)) {
-          updates.push(updateDoc(d.ref, { seenBy: arrayUnion(currentUser.uid), status: "seen" }));
+          updates.push(
+            updateDoc(
+              doc(db, `rooms/${roomId}/messages`, msg.id),
+              {
+                seenBy: arrayUnion(currentUser.uid),
+                status: "seen"
+              }
+            )
+          );
         }
       }
-      if (updates.length) await Promise.all(updates);
+
+      if (updates.length > 0) await Promise.all(updates);
     } catch (err) {
       console.error("Erro marcar seen:", err);
     }
   }
+
 
   // --------------- enviar mensagens (texto / arquivo / gif) ---------------
   // Essa função é usada pelo MessageInput (onSend)

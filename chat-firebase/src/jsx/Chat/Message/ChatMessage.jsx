@@ -41,7 +41,15 @@ export default function ChatMessage({
   // -------------------------------------------
 
   // -------- STATUS / TICKS (mantém igual) ----
-  let visualStatus = mensagem.status || "sent";
+  let visualStatus = "sent";
+
+  const seenBy = Array.isArray(mensagem.seenBy) ? mensagem.seenBy : [];
+  if (mensagem.from === idUsuarioAtual) {
+    if (seenBy.length > 0) visualStatus = "seen";
+    else if (mensagem.status === "received") visualStatus = "received";
+    else visualStatus = "sent";
+  }
+
 
   if (isGroup && typeof groupMemberCount === "number") {
     const seenBy = Array.isArray(mensagem.seenBy) ? mensagem.seenBy : [];

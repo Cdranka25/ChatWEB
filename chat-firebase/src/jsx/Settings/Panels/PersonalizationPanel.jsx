@@ -1,51 +1,10 @@
-// src/jsx/Settings/Panels/PersonalizationPanel.jsx
 import React, { useState, useEffect } from "react";
 import { WALLPAPERS } from "../../../js/Chat_js/Wallpaper_js/WallpaperLoader.js";
+import { THEMES } from "../../../js/Chat_js/Wallpaper_js/ThemePresets.js";
+import { db } from "../../../js/Firebase/FirebaseConfig.js";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const THEMES = {
-  whatsapp: {
-    "--bg": "#e5ddd5",
-    "--primary": "#075E54",
-    "--accent": "#128C7E",
-    "--chat-other": "#ffffff",
-    "--chat-me-grad-start": "#dcf8c6",
-    "--chat-me-grad-end": "#cfeec0",
-  },
-  telegram: {
-    "--bg": "#e6f0ff",
-    "--primary": "#0088cc",
-    "--accent": "#1c9be6",
-    "--chat-other": "#ffffff",
-    "--chat-me-grad-start": "#d8f1ff",
-    "--chat-me-grad-end": "#bfe8ff",
-  },
-  discord: {
-    "--bg": "#f2ecff",
-    "--primary": "#5865F2",
-    "--accent": "#6e7cff",
-    "--chat-other": "#ffffff",
-    "--chat-me-grad-start": "#efe9ff",
-    "--chat-me-grad-end": "#e2dbff",
-  },
-  amoled: {
-    "--bg": "#000000",
-    "--primary": "#1f1f1f",
-    "--accent": "#06d6a0",
-    "--chat-other": "#111111",
-    "--chat-me-grad-start": "#041f0f",
-    "--chat-me-grad-end": "#06331b",
-  },
-  beige: {
-    "--bg": "#fbf7f2",
-    "--primary": "#b38f6f",
-    "--accent": "#d6c2a1",
-    "--chat-other": "#ffffff",
-    "--chat-me-grad-start": "#f0e8df",
-    "--chat-me-grad-end": "#e6dccf",
-  },
-};
-
-export default function PersonalizationPanel() {
+export default function PersonalizationPanel({ currentUser }) {
   const [theme, setTheme] = useState("whatsapp");
   const [fontSize, setFontSize] = useState(15);
 
@@ -56,6 +15,13 @@ export default function PersonalizationPanel() {
   const [pendingPreset, setPendingPreset] = useState(null);
   const [dirty, setDirty] = useState(false);
 
+  // aplicar mapa de variáveis CSS
+  function applyThemeMap(map) {
+    for (const k in map) {
+      document.documentElement.style.setProperty(k, map[k]);
+    }
+  }
+
   // -----------------------------
   // Carregar configurações salvas
   // -----------------------------
@@ -65,8 +31,15 @@ export default function PersonalizationPanel() {
     const savedWallpaper = localStorage.getItem("wallpaper-upload");
     const savedPreset = localStorage.getItem("wallpaper-preset");
 
-    if (savedTheme) setTheme(savedTheme);
-    if (savedFont) setFontSize(Number(savedFont));
+    if (savedTheme && THEMES[savedTheme]) {
+      setTheme(savedTheme);
+      applyThemeMap(THEMES[savedTheme]);
+    }
+
+    if (savedFont) {
+      setFontSize(Number(savedFont));
+      document.documentElement.style.setProperty("--global-font-size", `${savedFont}px`);
+    }
 
     if (savedWallpaper) {
       setWallpaper(savedWallpaper);
@@ -81,23 +54,70 @@ export default function PersonalizationPanel() {
         document.documentElement.style.setProperty("--wallpaper-selected", `url(${src})`);
       }
     }
-  }, []);
+
+    // Carregar do Firestore
+    (async () => {
+      if (!currentUser) return;
+
+      try {
+        const ref = doc(db, "userSettings", currentUser.uid);
+        const snap = await getDoc(ref);
+        if (!snap.exists()) return;
+
+        const s = snap.data();
+
+        if (s.theme && THEMES[s.theme]) {
+          setTheme(s.theme);
+          applyThemeMap(THEMES[s.theme]);
+        }
+
+        if (s.fontSize) {
+          setFontSize(s.fontSize);
+          document.documentElement.style.setProperty("--global-font-size", `${s.fontSize}px`);
+        }
+
+        if (s.wallpaperUpload) {
+          setWallpaper(s.wallpaperUpload);
+          document.documentElement.style.setProperty("--wallpaper-selected", `url(${s.wallpaperUpload})`);
+        } else if (s.wallpaperPreset) {
+          setPreset(s.wallpaperPreset);
+          const mod = WALLPAPERS[s.wallpaperPreset];
+          const src = mod?.default || mod;
+          if (src) {
+            document.documentElement.style.setProperty("--wallpaper-selected", `url(${src})`);
+          }
+        }
+      } catch (err) {
+        console.warn("Erro ao carregar userSettings:", err);
+      }
+    })();
+
+  }, [currentUser]);
 
   // -----------------------------
-  // Aplicar tema + fonte
+  // Aplicar tema + fonte automaticamente
   // -----------------------------
   useEffect(() => {
     const map = THEMES[theme];
-    for (const k in map) document.documentElement.style.setProperty(k, map[k]);
+    if (map) applyThemeMap(map);
+
     document.documentElement.style.setProperty("--global-font-size", `${fontSize}px`);
 
     localStorage.setItem("theme", theme);
     localStorage.setItem("fontSize", fontSize);
-  }, [theme, fontSize]);
 
-  // -----------------------------
+    (async () => {
+      if (!currentUser) return;
+      try {
+        const ref = doc(db, "userSettings", currentUser.uid);
+        await setDoc(ref, { theme, fontSize }, { merge: true });
+      } catch (err) {
+        console.warn("Erro ao salvar theme/fontSize:", err);
+      }
+    })();
+  }, [theme, fontSize, currentUser]);
+
   // Upload temporário
-  // -----------------------------
   function handleWallpaperChange(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -111,49 +131,61 @@ export default function PersonalizationPanel() {
     reader.readAsDataURL(file);
   }
 
-  // -----------------------------
-  // Seleção de predefinidos
-  // -----------------------------
+  // Seleção de presets
   function handlePresetSelect(name) {
     setPendingWallpaper(null);
     setPendingPreset(name);
     setDirty(true);
   }
 
-  // -----------------------------
-  // Aplicar alterações
-  // -----------------------------
-  function applyChanges() {
-    if (pendingWallpaper) {
-      setWallpaper(pendingWallpaper);
-      setPreset(null);
-      document.documentElement.style.setProperty("--wallpaper-selected", `url(${pendingWallpaper})`);
+  // Aplicar alterações de wallpaper
+  async function applyChanges() {
+    try {
+      if (pendingWallpaper) {
+        setWallpaper(pendingWallpaper);
+        setPreset(null);
 
-      localStorage.setItem("wallpaper-upload", pendingWallpaper);
-      localStorage.removeItem("wallpaper-preset");
-    }
+        document.documentElement.style.setProperty("--wallpaper-selected", `url(${pendingWallpaper})`);
+        localStorage.setItem("wallpaper-upload", pendingWallpaper);
+        localStorage.removeItem("wallpaper-preset");
 
-    if (pendingPreset) {
-      const mod = WALLPAPERS[pendingPreset];
-      const src = mod?.default || mod;
-
-      if (src) {
-        document.documentElement.style.setProperty("--wallpaper-selected", `url(${src})`);
-        setPreset(pendingPreset);
-        setWallpaper(null);
-
-        localStorage.setItem("wallpaper-preset", pendingPreset);
-        localStorage.removeItem("wallpaper-upload");
+        if (currentUser) {
+          const ref = doc(db, "userSettings", currentUser.uid);
+          await setDoc(ref, { wallpaperUpload: pendingWallpaper, wallpaperPreset: null }, { merge: true });
+        }
       }
-    }
 
-    setDirty(false);
+      if (pendingPreset) {
+        const mod = WALLPAPERS[pendingPreset];
+        const src = mod?.default || mod;
+
+        if (src) {
+          document.documentElement.style.setProperty("--wallpaper-selected", `url(${src})`);
+          setPreset(pendingPreset);
+          setWallpaper(null);
+
+          localStorage.setItem("wallpaper-preset", pendingPreset);
+          localStorage.removeItem("wallpaper-upload");
+
+          if (currentUser) {
+            const ref = doc(db, "userSettings", currentUser.uid);
+            await setDoc(ref, { wallpaperPreset: pendingPreset, wallpaperUpload: null }, { merge: true });
+          }
+        }
+      }
+
+      setPendingWallpaper(null);
+      setPendingPreset(null);
+      setDirty(false);
+
+    } catch (err) {
+      console.error("Erro ao aplicar alterações:", err);
+      alert("Erro ao salvar alterações.");
+    }
   }
 
-  // -----------------------------
   // Remover papel de parede
-  // -----------------------------
-  function clearWallpaper() {
+  async function clearWallpaper() {
     setWallpaper(null);
     setPreset(null);
     setPendingWallpaper(null);
@@ -163,6 +195,15 @@ export default function PersonalizationPanel() {
 
     localStorage.removeItem("wallpaper-upload");
     localStorage.removeItem("wallpaper-preset");
+
+    if (currentUser) {
+      try {
+        const ref = doc(db, "userSettings", currentUser.uid);
+        await setDoc(ref, { wallpaperUpload: null, wallpaperPreset: null }, { merge: true });
+      } catch (err) {
+        console.warn("Erro ao limpar wallpaper:", err);
+      }
+    }
 
     setDirty(false);
   }
@@ -174,6 +215,7 @@ export default function PersonalizationPanel() {
       {/* Tema */}
       <div style={styles.block}>
         <label style={styles.label}>Tema</label>
+
         <div style={styles.swatchRow}>
           {Object.keys(THEMES).map((t) => (
             <div
@@ -213,7 +255,7 @@ export default function PersonalizationPanel() {
         </div>
       </div>
 
-      {/* Wallpapers pré-definidos */}
+      {/* Wallpapers */}
       <div style={styles.block}>
         <label style={styles.label}>Papéis de parede pré-definidos</label>
 
@@ -227,10 +269,9 @@ export default function PersonalizationPanel() {
                 style={{
                   ...styles.wallpaperTile,
                   backgroundImage: `url(${src})`,
-                  border:
-                    pendingPreset === name || preset === name
-                      ? "3px solid var(--primary)"
-                      : "2px solid #ccc",
+                  border: pendingPreset === name || preset === name
+                    ? "3px solid var(--primary)"
+                    : "2px solid #ccc",
                 }}
               />
             );
@@ -266,7 +307,7 @@ export default function PersonalizationPanel() {
 }
 
 /* ============================
-   ESTILOS INLINE
+   ESTILOS
 ============================ */
 const styles = {
   panel: {

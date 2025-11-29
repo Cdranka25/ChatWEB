@@ -6,15 +6,17 @@ export default function PopupNotification() {
     useEffect(() => {
         function onEvent(e) {
             const msg = e.detail || {};
-            const id = msg.id || Date.now();
-            const item = { ...msg, _uid: id };
+
+            const uid = Date.now();              // ID apenas visual
+            const item = { ...msg, _uid: uid };  // mantemos msg.id intacto
+
             setQueue(q => [...q, item]);
 
-            // remover após 4s
             setTimeout(() => {
-                setQueue(q => q.filter(n => n._uid !== id));
+                setQueue(q => q.filter(n => n._uid !== uid));
             }, 4000);
         }
+
 
         window.addEventListener("chat_notification", onEvent);
         return () => window.removeEventListener("chat_notification", onEvent);

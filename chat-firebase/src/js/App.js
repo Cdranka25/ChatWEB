@@ -6,11 +6,15 @@ import { auth } from "./Firebase/FirebaseConfig.js";
 import Login from "../jsx/Auth/Login.jsx";
 import Register from "../jsx/Auth/Register.jsx";
 
+import { loadUserTheme } from "./Chat_js/Wallpaper_js/ThemeLoader.js";
+
+
 import Sidebar from "../jsx/Sidebar/Sidebar.jsx";
 import PrivateChat from "../jsx/Chat/Private/PrivateChat.jsx";
 import GroupChat from "../jsx/Chat/Group/GroupChat.jsx";
 import CreateGroup from "../jsx/Chat/Group/CreateGroup.jsx";
 import AddContact from "../jsx/Chat/Contacts/AddContact.jsx";
+
 
 import SettingsScreen from "../jsx/Settings/SettingsScreen.jsx";
 import SecurityPanel from "../jsx/Settings/Panels/SecurityPanel.jsx";
@@ -18,9 +22,19 @@ import SecurityPanel from "../jsx/Settings/Panels/SecurityPanel.jsx";
 
 import Profile from "../jsx/Profile/Profile.jsx";
 
-import "../css/Style.css";
-import "../css/Sidebar.css";
+import "../css/Auth.css";
 import "../css/Chat.css";
+import "../css/Contacts.css";
+import "../css/Emoji.css";
+import "../css/Group.css";
+import "../css/Layout.css";
+import "../css/MenuFlutuante.css";
+import "../css/Modal.css";
+import "../css/Profile.css";
+import "../css/Settings.css";
+import "../css/Style.css";
+import "../css/Variables.css";
+
 import GroupView from "../jsx/Chat/Group/GroupView.jsx";
 
 function App() {
@@ -113,12 +127,17 @@ function App() {
         }
     }, []);
     useEffect(() => {
-        const unsub = onAuthStateChanged(auth, (u) => {
+        const unsub = onAuthStateChanged(auth, async (u) => {
             if (registering) return;
 
             if (u) {
                 setUser(u);
                 setScreen("private");
+
+                loadUserTheme(u);
+                console.log("Tema carregado após login");
+
+
                 Notification.requestPermission().then((perm) => {
                     console.log("Permissão de notificação:", perm);
                 });
@@ -130,6 +149,7 @@ function App() {
 
         return () => unsub();
     }, [registering]);
+
 
     const logout = async () => {
         await signOut(auth);

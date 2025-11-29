@@ -8,13 +8,23 @@ import DeleteAccountPanel from "./Panels/DeleteAccountPanel.jsx";
 export default function SettingsScreen({ onBack, currentUser }) {
   const [selected, setSelected] = useState(null);
 
+  function handleBack() {
+    if (selected) setSelected(null);
+    else onBack();
+  }
+
   return (
     <div className="settings-container">
 
-      {/* HEADER */}
+      {/* HEADER ÚNICO */}
       <div className="settings-header">
-        <button className="back-btn" onClick={onBack}>←</button>
-        <span className="settings-title">Configurações</span>
+        <button className="back-btn" onClick={handleBack}>←</button>
+
+        {!selected && <span className="settings-title">Configurações</span>}
+        {selected === "notifications" && <span className="settings-title">Notificações</span>}
+        {selected === "security" && <span className="settings-title">Segurança</span>}
+        {selected === "personalization" && <span className="settings-title">Personalização</span>}
+        {selected === "delete" && <span className="settings-title">Excluir Conta</span>}
       </div>
 
       {/* MENU PRINCIPAL */}
@@ -50,20 +60,11 @@ export default function SettingsScreen({ onBack, currentUser }) {
       )}
 
       {selected === "personalization" && (
-        <PersonalizationPanel /> // ✅ AGORA O PAINEL REAL APARECE
+        <PersonalizationPanel currentUser={currentUser} />
       )}
 
       {selected === "delete" && (
         <DeleteAccountPanel currentUser={currentUser} onAccountDeleted={onBack} />
-      )}
-
-      {/* BOTÃO VOLTAR */}
-      {selected && (
-        <div style={{ padding: 16 }}>
-          <button className="btn" onClick={() => setSelected(null)}>
-            ← Voltar
-          </button>
-        </div>
       )}
     </div>
   );

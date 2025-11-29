@@ -14,8 +14,9 @@ Projeto ChatWEB
         > Emojis via Twemoji
         > Tela de perfil e edição
         > Confirmação de leitura e recebimento
-        > Sistema de configurações (em desenvolvimento)
-        > Sistema de personalização (em desenvolvimento)
+        > Sistema de configurações
+        > Sistema de personalização
+        > Sistema de seleção e importação de imagens de fundo
         > Sistema de notificações (em desenvolvimento)
     
     ============================================================================================================================================================
@@ -123,6 +124,8 @@ Projeto ChatWEB
             node_modules/
             public/
             src/
+            ├── Assets/
+            │    ├──Wallpapers/
             ├── js/
             │    ├── Firebase/
             │    │     └── FirebaseConfig.js
@@ -131,7 +134,13 @@ Projeto ChatWEB
             │    │     └── SupabaseUpload.js
             │    ├── Search/
             │    │     └── UseSearchUsers.js
-            │    ├── Chat/
+            │    ├── Chat_js/
+            │    │     ├── Notification_js
+            │    │     │     └── NotificationManager.js
+            │    │     ├── Wallpaper_js
+            │    │     │     ├── ThemeLoader.js
+            │    │     │     ├── ThemePresets.js
+            │    │     │     └── WallpaperLoader.js
             │    │     ├── Emoji/
             │    │     │     ├── EmojiParser.js
             │    │     │     └── EmojiFallback.js
@@ -149,17 +158,23 @@ Projeto ChatWEB
             │    ├── Chat/
             │    │     ├── Contacts
             │    │     │    ├── Contacts.jsx
-            │    │     │    └── UserList.jsx        
+            │    │     │    └── AddContact.jsx        
             │    │     ├── Emoji
             │    │     │    └── EmojiInput.jsx        
             │    │     ├── Gif
             │    │     │    └── GifSearchModal.jsx       
             │    │     ├── Group
+            │    │     │    ├── AddMemberPopup.jsx
             │    │     │    ├── CreateGroup.jsx
-            │    │     │    └── GroupChat.jsx                
+            │    │     │    ├── GroupView.jsx
+            │    │     │    └── GroupChat.jsx    
+            │    │     ├── Messege
+            │    │     │    ├── ChatMessage.jsx
+            │    │     │    ├── ChatMessageDaySeparator.jsx
+            │    │     │    ├── ChatMessageMenu.jsx
+            │    │     │    └── MessageInput.jsx
             │    │     ├── Private
-            │    │     │    ├── PrivateChat.jsx
-            │    │     │    └── PrivateChat.MessageComponents.jsx                
+            │    │     │    └── PrivateChat.jsx             
             │    ├── Profile/
             │    │     ├── Profile.jsx
             │    │     ├── ProfileView.jsx
@@ -168,18 +183,30 @@ Projeto ChatWEB
             │    │     ├── Login.jsx
             │    │     └── Register.jsx
             │    ├──  Settings/
-            │    │     ├── SettingsContainer.jsx
-            │    │     ├── SettingsMenuFloating.jsx
             │    │     ├── SettingsScreen.jsx
             │    │     └── Panels
+            │    │          ├── SecurityPanel.jsx
             │    │          ├── DeleteAccountPanel.jsx
-            │    │          ├── NotificationsPanel.jsx
             │    │          ├── PersonalizationPanel.jsx
-            │    │          └── SecurityPanel.jsx
+            │    │          └── Notifications
+            │    │                  ├── PopupNotification.jsx
+            │    │                  └── NotificationPanel.jsx
+            │    ├──  Sidebar/
+            │    │     └── Sidebar.jsx            
             │    │
             ├── css/
-            │    ├── App.css
-            │    └── Theme.css
+            │    ├── Auth.css
+            │    ├── Chat.css
+            │    ├── Contacts.css
+            │    ├── Emoji.css
+            │    ├── Group.css
+            │    ├── Layout.css
+            │    ├── MenuFlutuante.css
+            │    ├── Modal.css
+            │    ├── Profile.css
+            │    ├── Settings.css
+            │    ├── Style.css
+            │    └── Variables.css
             │
             ├── App.test.js
             ├── index.js
@@ -191,38 +218,6 @@ Projeto ChatWEB
         UsersTeste.txt    
     
     ============================================================================================================================================================
-
-    - O que ainda falta fazer:
-        > Funcionalidades em desenvolvimento    
-            Permitir Excluir conta
-            Sistema completo de configurações
-            Troca de tema (claro/escuro + temas WhatsApp/Telegram/Discord)
-            Modo “Não Perturbe”
-            Silenciar grupos e contatos
-            Notificações Web Push
-            Permitir alterar senha
-            Papel de parede personalizado do chat
-        
-        > Funcionalidades menores
-            Funcionalidades menores
-            Melhorar sistema de preview de mídia
-            Melhorar exibição de links no perfil
-            Otimizar performance de Firestore (indexes)
-        
-        > Possíveis Melhorias Futuras
-            Possíveis Melhorias Futuras
-            Ligações/chamadas de áudio ou áudio e vídeo
-            Mensagens de áudio em tempo real
-            Criptografia ponta a ponta
-            Envio de múltiplas mídias simultâneas
-            Pastas para organizar conversas arquivadas
-            Filtro de mensagens (não lidas, lidas, grupos, etc)
-            Status (igual WhatsApp)
-            Tradução automática de mensagens
-            Plugins personalizáveis para grupos
-            Versão PWA (instalável)
-
-
 
 
 

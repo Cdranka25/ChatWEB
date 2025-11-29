@@ -196,26 +196,28 @@ export default function Contacts({ currentUser, search = "", setChatUser, setCha
 
 
     // ==========================================================
-    // 🔵 LISTENER DE NOTIFICAÇÕES DE GRUPOS
+    // 🔵 LISTENER DE NOTIFICAÇÕES DE CHATS PRIVADOS
     // ==========================================================
     useEffect(() => {
         if (!currentUser) return;
 
-        const groupsRef = collection(db, "groups");
-        const qGroups = query(groupsRef);
+        const roomsRef = collection(db, "rooms");
+        const qRooms = query(roomsRef, where("members", "array-contains", currentUser.uid));
 
-        const unsub = onSnapshot(qGroups, async (snap) => {
+        const unsub = onSnapshot(qRooms, async (snap) => {
 
-            for (let docGroup of snap.docs) {
-                const groupId = docGroup.id;
-                const group = docGroup.data();
+            for (let docRoom of snap.docs) {
+                const roomId = docRoom.id;
+                const room = docRoom.data();
 
-                if (!group.members?.includes(currentUser.uid)) continue;
+                if (!room.members?.includes(currentUser.uid)) continue;
 
-                const opened = localStorage.getItem("group_opened");
-                if (opened === groupId) continue;
+                // Se o chat privado estiver aberto, não notifica
+                const opened = localStorage.getItem("private_opened");
+                if (opened === roomId) continue;
 
-                const msgRef = collection(db, `groups/${groupId}/messages`);
+                // Pegando a última mensagem
+                const msgRef = collection(db, `rooms/${roomId}/messages`);
                 const qLast = query(msgRef, orderBy("createdAt", "desc"), limit(1));
 
                 const lastSnap = await getDocs(qLast);
@@ -225,10 +227,14 @@ export default function Contacts({ currentUser, search = "", setChatUser, setCha
                 const msg = msgDoc.data();
                 const msgId = msgDoc.id;
 
+                // ignorar mensagens enviadas por mim
                 if (msg.from === currentUser.uid) continue;
+
+                // ignorar se já lida
                 if (msg.seenBy?.includes(currentUser.uid)) continue;
 
-                const key = "notified_" + msgId;
+                // evitar notificar várias vezes
+                const key = "notified_priv_" + msgId;
                 if (localStorage.getItem(key)) continue;
 
                 const created = msg.createdAt?.toDate?.()?.getTime?.() ?? Date.now();
@@ -236,17 +242,23 @@ export default function Contacts({ currentUser, search = "", setChatUser, setCha
 
                 localStorage.setItem(key, "1");
 
+                // coletar dados do outro usuário
+                const otherId = room.members.find(id => id !== currentUser.uid);
+                const otherUser = allUsers.find(u => u.id === otherId);
+
                 notify({
                     id: msgId,
+                    messageId: msgId,
+                    roomId: roomId,
                     text: msg.text || "[mensagem]",
-                    senderName: group.name || "Novo grupo",
-                    isGroup: true
+                    senderName: otherUser?.nome || otherUser?.email || "Nova mensagem",
+                    isGroup: false
                 });
             }
         });
 
         return () => unsub();
-    }, [currentUser]);
+    }, [currentUser, allUsers]);
 
 
     // ================================

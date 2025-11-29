@@ -1,0 +1,32 @@
+:root {
+  /* Core Colors */
+  --primary: #075E54;
+  --primary-dark: #064a42;
+  --accent: #128C7E;
+
+  --bg: #e5ddd5;
+  --bg-light: #f0f2f5;
+
+  /* Chat bubbles */
+  --chat-me-start: #dcf8c6;
+  --chat-me-end: #cfeec0;
+  --chat-other: #ffffff;
+
+  /* Status indicators */
+  --danger: #ff3b30;
+  --success: #2d6a2d;
+
+  /* Borders & Shadows */
+  --border-light: rgba(0, 0, 0, 0.06);
+  --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+  /* Fonts */
+  --font-main: "Segoe UI", Arial, sans-serif;
+  --font-emoji: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji";
+
+  --global-font-size: 15px;
+
+  /* Chat wallpaper */
+  --wallpaper-selected: none;
+}
