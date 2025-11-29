@@ -1,4 +1,3 @@
-// src/jsx/Profile.jsx
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../../js/Firebase/FirebaseConfig.js";
 import {
@@ -31,6 +30,7 @@ export default function Profile({ currentUser, setScreen }) {
   const [emailModal, setEmailModal] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
+
   const statuses = ["online", "offline", "ocupado", "trabalhando", "inativo", "oscioso"];
 
   // LOAD USER DATA
@@ -55,25 +55,19 @@ export default function Profile({ currentUser, setScreen }) {
     if (!f) return;
 
     setAvatarFile(f);
-
-    const url = URL.createObjectURL(f);
-    setAvatarPreview(url);
+    setAvatarPreview(URL.createObjectURL(f));
   };
 
   // REMOVE AVATAR
   const handleRemoveAvatar = async () => {
     if (!data.avatarUrl) return;
-
     if (!window.confirm("Remover avatar atual?")) return;
 
     setRemovingAvatar(true);
 
     try {
-      // extrair path do avatar
       const path = data.avatarUrl.split("/object/public/ChatWEB/")[1];
-      if (path) {
-        await removeFile(path);
-      }
+      if (path) await removeFile(path);
 
       await updateDoc(doc(db, "users", uid), {
         avatarUrl: "",
@@ -97,15 +91,12 @@ export default function Profile({ currentUser, setScreen }) {
 
     let avatarUrl = data.avatarUrl;
 
-    // UPLOAD NEW AVATAR
     if (avatarFile) {
       const uploaded = await uploadAvatar(avatarFile, uid);
       avatarUrl = uploaded.publicUrl;
     }
 
-    const docRef = doc(db, "users", uid);
-
-    await updateDoc(docRef, {
+    await updateDoc(doc(db, "users", uid), {
       nome: data.nome || "",
       birthdate: data.birthdate || "",
       company: data.company || "",
@@ -130,7 +121,6 @@ export default function Profile({ currentUser, setScreen }) {
       );
 
       await reauthenticateWithCredential(currentUser, cred);
-
       await updateEmail(currentUser, newEmail);
 
       await updateDoc(doc(db, "users", uid), {
@@ -172,7 +162,8 @@ export default function Profile({ currentUser, setScreen }) {
       <div className="chat-header">
         <button
           onClick={() => setScreen("private")}
-          style={{ background: "transparent", border: "none", color: "white", fontSize: 18 }}
+          className="back-btn"
+          style={{ background: "transparent", border: "none", color: "white" }}
         >
           ←
         </button>
@@ -181,135 +172,148 @@ export default function Profile({ currentUser, setScreen }) {
 
       {/* BODY */}
       <div className="profile-container">
+        <div className="profile-card">
 
-        {/* AVATAR */}
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <Avatar
-            user={{ avatarUrl: avatarPreview || data.avatarUrl }}
-            size={120}
-          />
-
-          <div style={{ marginTop: 10 }}>
-            <label className="btn">
-              Trocar Avatar
-              <input type="file" accept="image/*" onChange={handleAvatarSelect} style={{ display: "none" }} />
-            </label>
-
-            {data.avatarUrl && (
-              <button onClick={handleRemoveAvatar} disabled={removingAvatar} style={{ marginLeft: 10 }}>
-                Remover
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* CAMPOS DO PERFIL */}
-        <div className="profile-field">
-          <label>Nome</label>
-          <input
-            value={data.nome || ""}
-            onChange={(e) => setData({ ...data, nome: e.target.value })}
-          />
-        </div>
-
-        <div className="profile-field">
-          <label>Data de nascimento</label>
-          <input
-            type="date"
-            value={data.birthdate || ""}
-            onChange={(e) => setData({ ...data, birthdate: e.target.value })}
-          />
-        </div>
-
-        <div className="profile-field">
-          <label>Empresa</label>
-          <input
-            value={data.company || ""}
-            onChange={(e) => setData({ ...data, company: e.target.value })}
-          />
-        </div>
-
-        <div className="profile-field">
-          <label>Sobre</label>
-          <textarea
-            rows={3}
-            value={data.about || ""}
-            onChange={(e) => setData({ ...data, about: e.target.value })}
-          ></textarea>
-        </div>
-
-        <div className="profile-field">
-          <label>Status</label>
-          <select
-            value={data.status || ""}
-            onChange={(e) => setData({ ...data, status: e.target.value })}
-          >
-            <option value="">Selecione...</option>
-            {statuses.map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="profile-field">
-          <label>Email</label>
-          <div style={{ display: "flex", gap: 10 }}>
-            <input value={data.email || ""} disabled />
-            <button onClick={() => {
-              setNewEmail(data.email);
-              setEmailModal(true);
-            }}>
-              Alterar
-            </button>
-          </div>
-        </div>
-
-        <div className="profile-field">
-          <label>Telefone</label>
-          <input
-            value={data.phone || ""}
-            onChange={(e) => setData({ ...data, phone: e.target.value })}
-          />
-        </div>
-
-        {/* LINKS */}
-        <div className="profile-field">
-          <label>Links</label>
-
-          {(!data.links || data.links.length === 0) && (
-            <p style={{ fontSize: 12 }}>Nenhum link adicionado.</p>
-          )}
-
-          {data.links && data.links.map((l, i) => (
-            <div key={i} style={{ marginBottom: 10 }}>
-              <input
-                placeholder="Nome (ex: Instagram)"
-                value={l.label}
-                onChange={(e) => updateLink(i, "label", e.target.value)}
-                style={{ width: "40%", marginRight: 10 }}
+          {/* AVATAR */}
+          <div className="profile-avatar-area">
+            <div className="profile-avatar">
+              <Avatar
+                user={{ avatarUrl: avatarPreview || data.avatarUrl }}
+                size={120}
               />
-              <input
-                placeholder="URL"
-                value={l.url}
-                onChange={(e) => updateLink(i, "url", e.target.value)}
-                style={{ width: "40%", marginRight: 10 }}
-              />
-              <button onClick={() => removeLink(i)}>X</button>
             </div>
-          ))}
 
-          <button onClick={addLink}>+ Adicionar Link</button>
+            <div className="profile-avatar-controls">
+              <label className="btn btn-small">
+                Trocar Avatar
+                <input type="file" accept="image/*" onChange={handleAvatarSelect} style={{ display: "none" }} />
+              </label>
+
+              {data.avatarUrl && (
+                <button
+                  className="btn ghost btn-small"
+                  onClick={handleRemoveAvatar}
+                  disabled={removingAvatar}
+                >
+                  Remover
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* CAMPOS DO PERFIL */}
+          <div className="profile-fields">
+
+            <div className="profile-field">
+              <label>Nome</label>
+              <input
+                value={data.nome || ""}
+                onChange={(e) => setData({ ...data, nome: e.target.value })}
+              />
+            </div>
+
+            <div className="profile-field">
+              <label>Data de nascimento</label>
+              <input
+                type="date"
+                value={data.birthdate || ""}
+                onChange={(e) => setData({ ...data, birthdate: e.target.value })}
+              />
+            </div>
+
+            <div className="profile-field">
+              <label>Empresa</label>
+              <input
+                value={data.company || ""}
+                onChange={(e) => setData({ ...data, company: e.target.value })}
+              />
+            </div>
+
+            <div className="profile-field">
+              <label>Sobre</label>
+              <textarea
+                rows={3}
+                value={data.about || ""}
+                onChange={(e) => setData({ ...data, about: e.target.value })}
+              ></textarea>
+            </div>
+
+            <div className="profile-field">
+              <label>Status</label>
+              <select
+                value={data.status || ""}
+                onChange={(e) => setData({ ...data, status: e.target.value })}
+              >
+                <option value="">Selecione...</option>
+                {statuses.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="profile-field">
+              <label>Email</label>
+              <div className="inline">
+                <input value={data.email || ""} disabled />
+                <button className="btn ghost btn-small" onClick={() => {
+                  setNewEmail(data.email);
+                  setEmailModal(true);
+                }}>
+                  Alterar
+                </button>
+              </div>
+            </div>
+
+            <div className="profile-field">
+              <label>Telefone</label>
+              <input
+                value={data.phone || ""}
+                onChange={(e) => setData({ ...data, phone: e.target.value })}
+              />
+            </div>
+
+            {/* LINKS */}
+            <div className="profile-field">
+              <label>Links</label>
+
+              {(!data.links || data.links.length === 0) && (
+                <p style={{ fontSize: 12 }}>Nenhum link adicionado.</p>
+              )}
+
+              {data.links && data.links.map((l, i) => (
+                <div className="profile-link-row" key={i}>
+                  <input
+                    placeholder="Nome (ex: Instagram)"
+                    value={l.label}
+                    onChange={(e) => updateLink(i, "label", e.target.value)}
+                    style={{ width: "38%" }}
+                  />
+                  <input
+                    placeholder="URL"
+                    value={l.url}
+                    onChange={(e) => updateLink(i, "url", e.target.value)}
+                    style={{ width: "48%" }}
+                  />
+                  <button className="btn ghost btn-small" onClick={() => removeLink(i)}>X</button>
+                </div>
+              ))}
+
+              <button className="btn btn-small" onClick={addLink}>
+                + Adicionar Link
+              </button>
+            </div>
+
+            <div className="profile-field">
+              <label>Usuário desde</label>
+              <input value={data.createdAt?.toDate().toLocaleString() || ""} disabled />
+            </div>
+          </div>
+
+          <button className="save-btn" onClick={saveProfile}>
+            Salvar
+          </button>
+
         </div>
-
-        <div className="profile-field">
-          <label>Usuário desde</label>
-          <input value={data.createdAt?.toDate().toLocaleString() || ""} disabled />
-        </div>
-
-        {/* BOTÃO SALVAR */}
-        <button className="save-btn" onClick={saveProfile}>
-          Salvar
-        </button>
       </div>
 
       {/* MODAL EMAIL */}
@@ -317,11 +321,13 @@ export default function Profile({ currentUser, setScreen }) {
         <div className="modal-backdrop">
           <div className="modal-content">
             <h3>Alterar Email</h3>
+
             <input
               placeholder="Novo email"
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
             />
+
             <input
               placeholder="Senha atual"
               type="password"
@@ -329,11 +335,12 @@ export default function Profile({ currentUser, setScreen }) {
               onChange={(e) => setEmailPassword(e.target.value)}
             />
 
-            <button onClick={updateUserEmail}>Confirmar</button>
-            <button onClick={() => setEmailModal(false)}>Cancelar</button>
+            <button className="btn" onClick={updateUserEmail}>Confirmar</button>
+            <button className="btn ghost" onClick={() => setEmailModal(false)}>Cancelar</button>
           </div>
         </div>
       )}
+
     </div>
   );
 }

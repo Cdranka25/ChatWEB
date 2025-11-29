@@ -41,7 +41,7 @@ export default function Register({ setScreen, setRegistering }) {
       // UPLOAD DE AVATAR
       let avatarUrl = "";
       if (avatarFile) {
-        const res = await uploadAvatar(avatarFile, uid); 
+        const res = await uploadAvatar(avatarFile, uid);
         avatarUrl = res.publicUrl;
         avatarPath = res.path;
       }
@@ -78,7 +78,7 @@ export default function Register({ setScreen, setRegistering }) {
           await deleteUser(createdUser);
         } catch (rollbackErr) {
           console.error("Erro rollback:", rollbackErr);
-          try { await signOut(auth); } catch (_) {}
+          try { await signOut(auth); } catch (_) { }
         }
       }
 
@@ -92,26 +92,28 @@ export default function Register({ setScreen, setRegistering }) {
 
 
   return (
-    <div className="login-container">
+    <div className="auth-container">
       <h2>Criar Conta</h2>
 
-      <input placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
-      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input placeholder="Senha" type="password" value={senha} onChange={e => setSenha(e.target.value)} />
-      <input placeholder="Confirmar senha" type="password" value={senha2} onChange={e => setSenha2(e.target.value)} />
+      <input className="auth-input" placeholder="Nome" value={nome} onChange={e => setNome(e.target.value)} />
+      <input className="auth-input" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+      <input className="auth-input" type="password" placeholder="Senha" value={senha} onChange={e => setSenha(e.target.value)} />
+      <input className="auth-input" type="password" placeholder="Confirmar senha" value={senha2} onChange={e => setSenha2(e.target.value)} />
 
-      <div style={{ marginTop: 8 }}>
-        <label>Avatar (opcional)</label>
+      <div className="auth-file">
+        <label>Avatar (opcional):</label>
         <input type="file" accept="image/*" onChange={e => setAvatarFile(e.target.files[0] || null)} />
       </div>
 
-      <button onClick={cadastrar} disabled={loading}>
+      <button className="auth-btn" onClick={cadastrar} disabled={loading}>
         {loading ? "Criando..." : "Cadastrar"}
       </button>
 
-      <p style={{ marginTop: 20, cursor: "pointer" }} onClick={() => setScreen("login")}>
-        Voltar ao Login
+      <p className="auth-link" onClick={() => setScreen("login")} style={{ cursor: "pointer" }}>
+        Voltar ao login
       </p>
     </div>
+
   );
+
 }

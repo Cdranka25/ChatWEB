@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from "react";
 import {
   collection,
@@ -16,11 +17,14 @@ import {
 } from "firebase/firestore";
 import { db } from "../../../js/Firebase/FirebaseConfig.js";
 
+import { notify } from "../../../js/Chat_js/Notifications_js/NotificationManager.js";
+
+
 import useSearchUsers from "../../../js/Search/UseSearchUsers.js";
 
 import ChatMessage from "../Message/ChatMessage.jsx";
 import MessageInput from "../Message/MessageInput.jsx";
-import { makeRoomId, formatTime } from "../../../js/Chat_js/PrivateChat.helpers.js";
+import { makeRoomId } from "../../../js/Chat_js/PrivateChat.helpers.js";
 import { uploadFileForMessage, extractFileFromPaste, permissiveFileTypeCheck } from "../../../js/Chat_js/PrivateChat.media.js";
 
 import Avatar from "../../Profile/Avatar.jsx";
@@ -29,6 +33,7 @@ import ProfileView from "../../Profile/ProfileView.jsx";
 export default function PrivateChat({ currentUser, otherUser, onClose }) {
   const roomId = makeRoomId(currentUser.uid, otherUser.id);
   const { allUsers } = useSearchUsers();
+  const extractFileFromPaste = () => { };
 
   const [messages, setMessages] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -287,25 +292,28 @@ export default function PrivateChat({ currentUser, otherUser, onClose }) {
       <div className="chat-box" ref={listRef} style={{ overflowY: "auto" }}>
         {messages.map((m, i) => {
           if (m.deletedFor?.includes(currentUser.uid)) return null;
+          const isMe = m.from === currentUser.uid;
+          const sender = findUserById(m.from);
+          const prev = i > 0 ? messages[i - 1].createdAt : null;
 
           return (
-            <ChatMessage
-              key={m.id}
-              mensagem={m}
-              previousCreatedAt={i > 0 ? messages[i - 1].createdAt : null}
-              euSou={m.from === currentUser.uid}
-              remetente={findUserById(m.from)}
-              idUsuarioAtual={currentUser.uid}
-              abertoPara={abertoPara}
-              setAbertoPara={setAbertoPara}
-              onEditar={startEditing}
-              onExcluirParaMim={deleteForMe}
-              onExcluirParaTodos={deleteForAll}
-              mostrarNomeRemetente={false}
-            />
+            <div key={m.id} style={{ width: "100%" }}>
+              <ChatMessage
+                mensagem={m}
+                previousCreatedAt={prev}
+                euSou={isMe}
+                remetente={sender}
+                idUsuarioAtual={currentUser.uid}
+                abertoPara={abertoPara}
+                setAbertoPara={setAbertoPara}
+                onEditar={startEditing}
+                onExcluirParaMim={deleteForMe}
+                onExcluirParaTodos={deleteForAll}
+                mostrarNomeRemetente={false}
+              />
+            </div>
           );
         })}
-
       </div>
 
       {/* input area */}

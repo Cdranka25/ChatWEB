@@ -65,8 +65,11 @@ export default function ChatMessage({
   return (
     <div>
       {showDaySeparator && (
-        <ChatMessageDaySeparator createdAt={mensagem.createdAt} />
+        <div style={{ width: "100%" }}>
+          <ChatMessageDaySeparator createdAt={mensagem.createdAt} />
+        </div>
       )}
+
 
       <div
         style={{

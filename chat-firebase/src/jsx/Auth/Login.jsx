@@ -1,4 +1,3 @@
-// src/jsx/Auth/Login.jsx
 import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../js/Firebase/FirebaseConfig.js";
@@ -14,14 +13,8 @@ export default function Login({ setUser, setScreen }) {
 
     try {
       const cred = await signInWithEmailAndPassword(auth, email, senha);
-      const user = cred.user;
-
-      console.log("Login OK:", user.uid);
-
-      setUser(user);
-
+      setUser(cred.user);
     } catch (err) {
-      console.error("Erro no login:", err);
       alert("Erro no login: " + err.message);
     } finally {
       setLoading(false);
@@ -29,34 +22,31 @@ export default function Login({ setUser, setScreen }) {
   };
 
   return (
-    <div className="login-container">
-      <h2>Login no Chat</h2>
+    <div className="auth-container">
+      <h2>Entrar no Chat</h2>
 
       <input
+        className="auth-input"
         placeholder="Email"
         value={email}
         onChange={e => setEmail(e.target.value)}
       />
 
       <input
-        placeholder="Senha"
+        className="auth-input"
         type="password"
+        placeholder="Senha"
         value={senha}
         onChange={e => setSenha(e.target.value)}
       />
 
-      <button onClick={login} disabled={loading}>
+      <button className="auth-btn" onClick={login} disabled={loading}>
         {loading ? "Entrando..." : "Entrar"}
       </button>
 
-      <p style={{ marginTop: 20 }}>
-        Ainda não tem conta?{" "}
-        <span
-          style={{ color: "blue", cursor: "pointer" }}
-          onClick={() => setScreen("register")}
-        >
-          Criar Conta
-        </span>
+      <p className="auth-link">
+        Não tem conta?{" "}
+        <span onClick={() => setScreen("register")}>Criar conta</span>
       </p>
     </div>
   );

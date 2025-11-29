@@ -3,9 +3,11 @@ import { useState } from "react";
 import { db } from "../../../js/Firebase/FirebaseConfig.js";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import useSearchUsers from "../../../js/Search/UseSearchUsers.js";
+import Avatar from "../../Profile/Avatar.jsx";
 
 export default function CreateGroup({ currentUser, setScreen }) {
     const { allUsers, filtered, search, searchUsers } = useSearchUsers();
+
     const [name, setName] = useState("");
     const [selected, setSelected] = useState([]);
 
@@ -21,10 +23,8 @@ export default function CreateGroup({ currentUser, setScreen }) {
         if (!name) return alert("Nome do grupo obrigatório");
         if (selected.length === 0) return alert("Selecione pelo menos 1 membro");
 
-        // 🔥 membros como STRINGS
         const members = [currentUser.uid, ...selected];
 
-        // 🔥 metadata dos membros separada (opcional, igual WhatsApp Business API)
         const memberData = members.map(id => {
             const u =
                 allUsers?.find(x => x.id === id) ||
@@ -40,8 +40,8 @@ export default function CreateGroup({ currentUser, setScreen }) {
 
         await addDoc(collection(db, "groups"), {
             name,
-            members,          // ← agora correto
-            memberData,       // ← opcional e compatível com GroupChat
+            members,
+            memberData,
             createdBy: currentUser.uid,
             createdAt: serverTimestamp(),
             lastMessage: "",
@@ -54,40 +54,66 @@ export default function CreateGroup({ currentUser, setScreen }) {
     const usersToShow = filtered.filter(u => u.id !== currentUser.uid);
 
     return (
-        <div>
-            <h2>Criar Grupo</h2>
+        <div className="create-group-container">
 
-            <input
-                placeholder="Nome do grupo"
-                value={name}
-                onChange={e => setName(e.target.value)}
-            />
-
-            <input
-                placeholder="Pesquisar usuários"
-                value={search}
-                onChange={e => searchUsers(e.target.value)}
-            />
-
-            <h3>Membros</h3>
-            {usersToShow.map(u => (
-                <label key={u.id} style={{ display: 'block', margin: '5px 0' }}>
-                    <input
-                        type="checkbox"
-                        checked={selected.includes(u.id)}
-                        onChange={() => toggle(u.id)}
-                    />
-                    {u.nome || u.email}
-                </label>
-            ))}
-
-            <div style={{ marginTop: '20px' }}>
-                <button onClick={create} style={{ marginRight: '10px' }}>Criar</button>
-                <button onClick={() => setScreen("private")}>Cancelar</button>
+            {/* HEADER */}
+            <div className="create-group-header">
+                <button className="back-btn" onClick={() => setScreen("private")}>←</button>
+                <span>Criar Grupo</span>
+                <div></div>
             </div>
 
-            <div style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
-                {selected.length} membro(s) selecionado(s)
+            {/* CARD */}
+            <div className="create-group-card">
+
+                {/* Nome do grupo */}
+                <div className="input-block">
+                    <label>Nome do grupo</label>
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        placeholder="Ex: Amigos, Trabalho, Família..."
+                    />
+                </div>
+
+                {/* Barra de pesquisa */}
+                <div className="input-block">
+                    <label>Pesquisar usuários</label>
+                    <input
+                        type="text"
+                        value={search}
+                        onChange={e => searchUsers(e.target.value)}
+                        placeholder="Digite um nome ou email..."
+                    />
+                </div>
+
+                {/* Lista */}
+                <div className="member-list">
+                    {usersToShow.map(u => (
+                        <div key={u.id} className="member-item" onClick={() => toggle(u.id)}>
+                            <Avatar user={u} size={40} />
+                            <div className="member-info">
+                                <div className="member-name">{u.nome || u.email}</div>
+                                <div className="member-email">{u.email}</div>
+                            </div>
+
+                            <input
+                                type="checkbox"
+                                checked={selected.includes(u.id)}
+                                onChange={() => toggle(u.id)}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <div className="create-footer">
+                    <span>{selected.length} membro(s) selecionado(s)</span>
+
+                    <button className="btn" onClick={create}>
+                        Criar Grupo
+                    </button>
+                </div>
             </div>
         </div>
     );

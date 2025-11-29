@@ -3,3 +3,145 @@
   color: #999;
   pointer-events: none;
 }
+
+
+.chat-area {
+    flex: 1; /* ocupa todo o resto do espaço */
+    min-width: 0; /* impede overflow e barras brancas */
+    background: #efeae2;
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+/* =============================
+     CREATE GROUP SCREEN
+============================= */
+
+.create-group-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #efeae2;
+}
+
+.create-group-header {
+    height: 60px;
+    background: #075E54;
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 17px;
+    font-weight: bold;
+    justify-content: space-between;
+}
+
+.create-group-header .back-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.create-group-card {
+    margin: 18px auto;
+    width: 90%;
+    max-width: 560px;
+    background: #fff;
+    padding: 18px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* Inputs */
+.input-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-block label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.input-block input {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+/* Lista de membros */
+.member-list {
+    max-height: 340px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.member-item:last-child {
+    border-bottom: none;
+}
+
+.member-item:hover {
+    background: #f2f2f2;
+}
+
+.member-info {
+    flex: 1;
+}
+
+.member-name {
+    font-weight: 600;
+}
+
+.member-email {
+    font-size: 12px;
+    color: #777;
+}
+
+/* Rodapé */
+.create-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 8px;
+}
+
+.create-footer span {
+    font-size: 13px;
+    color: #666;
+}
+
+.create-footer .btn {
+    padding: 10px 16px;
+    background: #075E54;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.create-footer .btn:hover {
+    background: #064A42;
+}
